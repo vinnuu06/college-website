@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="../public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js & Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../public/js/three-bg.js"></script>
+    <script src="../public/js/api.js"></script>
+    <script src="../public/js/socket-client.js"></script>
+</head>
+
+<body class="bg-black text-gray-200 min-h-screen">
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner"></div>
+        <h2 class="loader-text">LOADING DASHBOARD</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- DASHBOARD WRAPPER -->
+<div class="relative z-10 flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 glass-card rounded-none border-t-0 border-b-0 border-l-0 flex flex-col hidden md:flex" style="border-right-color: rgba(255, 215, 0, 0.3);">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 gap-3">
+            <i class="fas fa-user-graduate text-2xl" style="color: var(--gold);"></i>
+            <span class="font-orbitron font-bold tracking-wider text-white">STUDENT<span style="color: var(--gold);">PORTAL</span></span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gold/10 text-gold border border-gold/20 transition-colors">
+                <i class="fas fa-home w-5"></i> Overview
+            </a>
+            <a href="courses.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-book w-5"></i> Academics
+            </a>
+            <a href="#librarySection" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors scroll-to-section">
+                <i class="fas fa-library w-5"></i> Library
+            </a>
+            <a href="placements.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-briefcase w-5"></i> Placements
+            </a>
+            <a href="contact.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-headset w-5"></i> Support
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-white/10">
+            <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors">
+                <i class="fas fa-sign-out-alt w-5"></i> Terminate Session
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="h-20 glass-card rounded-none border-t-0 border-l-0 border-r-0 flex items-center justify-between px-8 sticky top-0 z-20">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-gray-400 hover:text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-xl font-bold font-orbitron text-white">Dashboard Overview</h2>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-white" id="userName">Student Name</p>
+                    <p class="text-xs text-gray-400" id="userEmail">student@bellari.edu</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-orange-600 flex items-center justify-center font-bold text-black border border-white/20">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Body -->
+        <div class="p-8 max-w-7xl mx-auto w-full space-y-8 fade-in">
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Profile Snippet -->
+                <div class="glass-card flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                        <i class="fas fa-id-card text-xl" style="color: var(--gold);"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Roll Number</p>
+                        <h3 class="text-xl font-bold text-white font-orbitron" id="studentRoll">--</h3>
+                    </div>
+                </div>
+                
+                <!-- CGPA -->
+                <div class="glass-card flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                        <i class="fas fa-chart-pie text-xl text-green-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Current CGPA</p>
+                        <h3 class="text-xl font-bold text-white font-orbitron" id="studentCGPA">0.00</h3>
+                    </div>
+                </div>
+                
+                <!-- Semester -->
+                <div class="glass-card flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                        <i class="fas fa-layer-group text-xl text-blue-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Semester / Dept</p>
+                        <h3 class="text-lg font-bold text-white font-orbitron truncate">
+                            <span id="studentSem">-</span> | <span id="studentDept">-</span>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Academic Records (Left column, takes 2/3) -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass-card">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-book mr-2" style="color: var(--gold);"></i> Academic Records
+                            </h3>
+                            <button onclick="viewTranscript()" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1 rounded transition-colors text-white">
+                                View Full Transcript
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-400 uppercase bg-white/5">
+                                    <tr>
+                                        <th class="px-4 py-3 rounded-l-lg">Course Name</th>
+                                        <th class="px-4 py-3">Code</th>
+                                        <th class="px-4 py-3 text-center">Credits</th>
+                                        <th class="px-4 py-3 text-center">Grade</th>
+                                        <th class="px-4 py-3 text-center rounded-r-lg">Marks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="academicsTable" class="divide-y divide-white/5">
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i> Loading records...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Enrolled Courses -->
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold font-orbitron text-white mb-6 border-b border-white/10 pb-4">
+                            <i class="fas fa-list mr-2" style="color: var(--gold);"></i> Enrolled Courses
+                        </h3>
+                        <div id="coursesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="text-gray-500 col-span-2 text-center py-4">Loading courses...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-8">
+                    <!-- Placement Status -->
+                    <div class="glass-card relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <i class="fas fa-briefcase text-6xl text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-bold font-orbitron text-white mb-6 relative z-10">
+                            Placement Status
+                        </h3>
+                        
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10 relative z-10">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">Current Status</span>
+                                <span id="placementStatusBadge" class="badge bg-gray-500/20 text-gray-400 border border-gray-500/30">Not Placed</span>
+                            </div>
+                            
+                            <div id="placementDetails" class="hidden space-y-3 pt-3 border-t border-white/10">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Company</p>
+                                    <p class="font-bold text-white" id="placementCompany">--</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Position</p>
+                                    <p class="text-sm text-white" id="placementPos">--</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Package</p>
+                                    <p class="text-lg font-bold text-green-400" id="placementSalary">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Exams & Timetables -->
+                    <div class="glass-card border-l-4 border-l-purple-500">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-file-invoice mr-2 text-purple-400"></i> Exam Schedules
+                            </h3>
+                            <span class="badge bg-purple-500/10 text-purple-400 border border-purple-500/30">Upcoming</span>
+                        </div>
+                        
+                        <div id="examList" class="space-y-3">
+                            <!-- Exams will be injected here -->
+                            <div class="text-center py-4 text-gray-500 text-sm">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Loading schedules...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Stats -->
+                    <div class="glass-card border-l-4 border-l-blue-500">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-chart-pie mr-2 text-blue-400"></i> Attendance Insights
+                            </h3>
+                            <span id="avgAttendance" class="badge bg-blue-500/10 text-blue-400 border border-blue-500/30">0% Avg</span>
+                        </div>
+                        
+                        <div id="attendanceContainer" class="space-y-4">
+                            <!-- Attendance bars will be injected here -->
+                            <div class="text-center py-4 text-gray-500 text-sm">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Loading attendance...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resume Management -->
+                    <div class="glass-card border-l-4 border-l-red-500">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-file-pdf mr-2 text-red-500"></i> Resume Management
+                            </h3>
+                            <span id="resumeStatus" class="badge bg-white/5 text-gray-400 border border-white/10">No Resume</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <p class="text-sm text-gray-400">Upload your latest resume (PDF) to be visible to recruiters during placement drives.</p>
+                            
+                            <div id="resumeView" class="hidden flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 mb-4">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-file-pdf text-2xl text-red-500"></i>
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase">Active CV</p>
+                                        <a href="#" id="resumeLink" target="_blank" class="text-sm text-white font-bold hover:text-gold transition-colors">Download Resume</a>
+                                    </div>
+                                </div>
+                                <button onclick="triggerResumeUpload()" class="text-xs text-gray-400 hover:text-white"><i class="fas fa-sync-alt"></i> Update</button>
+                            </div>
+
+                            <button id="uploadResumeBtn" onclick="triggerResumeUpload()" class="w-full bg-red-600 hover:bg-red-500 text-white py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-upload"></i> Upload Professional CV
+                            </button>
+                            <input type="file" id="resumeInput" class="hidden" accept=".pdf" onchange="handleResumeUpload(event)">
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold font-orbitron text-white mb-4 border-b border-white/10 pb-4">
+                            <i class="fas fa-bell mr-2" style="color: var(--gold);"></i> Recent Updates
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-2 h-2 mt-2 rounded-full bg-red-500 shrink-0"></div>
+                                <div>
+                                    <p class="text-sm text-white">Semester 4 Results Declared</p>
+                                    <p class="text-xs text-gray-500">2 days ago</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-2 h-2 mt-2 rounded-full bg-gold shrink-0"></div>
+                                <div>
+                                    <p class="text-sm text-white">TCS Campus Drive Registration Open</p>
+                                    <p class="text-xs text-gray-500">5 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- LIBRARY SECTION -->
+        <div id="librarySection" class="p-8 max-w-7xl mx-auto w-full space-y-8 border-t border-white/10">
+            <h2 class="text-2xl font-bold font-orbitron text-white flex items-center gap-3">
+                <i class="fas fa-book-open" style="color: var(--gold);"></i> Library Catalog
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Search & Browse (Left - 2/3) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Search Books -->
+                    <div class="glass-card">
+                        <h3 class="font-bold font-orbitron text-white mb-6 flex items-center gap-2">
+                            <i class="fas fa-search" style="color: var(--gold);"></i> Search Catalog
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <input type="text" id="catalogSearchInput" placeholder="Search books by title, author, or keyword..." class="flex-1 bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-gold focus:outline-none transition-colors">
+                                <select id="catalogCategoryFilter" class="bg-black border border-white/10 p-3 rounded text-sm text-white">
+                                    <option value="">All Categories</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Literature">Literature</option>
+                                    <option value="Science">Science</option>
+                                    <option value="History">History</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Books Grid -->
+                            <div id="catalogBooksList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="col-span-2 text-center py-8 text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading books...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Library Guidelines -->
+                    <div class="glass-card bg-gradient-to-r from-gold/10 to-transparent border-l-4 border-l-gold">
+                        <h3 class="font-bold font-orbitron text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-info-circle" style="color: var(--gold);"></i> Library Information
+                        </h3>
+                        <div class="space-y-3 text-sm text-gray-300">
+                            <p><strong>Issue Period:</strong> Books can be issued for up to 14 days</p>
+                            <p><strong>Renewals:</strong> Books can be renewed once before due date</p>
+                            <p><strong>Late Fine:</strong> ₹10 per day after due date</p>
+                            <p><strong>Contact:</strong> Visit library or email library@bellari.edu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (1/3) -->
+                <div class="space-y-6">
+                    <!-- My Books -->
+                    <div class="glass-card border-t-4 border-t-blue-500">
+                        <h3 class="font-bold font-orbitron text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-books text-blue-400"></i> My Books
+                        </h3>
+                        <div id="myBooksList" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                            <div class="text-center py-6 text-gray-500 text-sm">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Loading...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Due Soon Alert -->
+                    <div class="glass-card border-l-4 border-l-yellow-500" id="dueSoonCard" style="display: none;">
+                        <h3 class="font-bold font-orbitron text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-exclamation-circle text-yellow-400"></i> Due Soon
+                        </h3>
+                        <div id="dueSoonList" class="space-y-2 text-sm">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Overdue Alert -->
+                    <div class="glass-card border-l-4 border-l-red-500" id="overdueCard" style="display: none;">
+                        <h3 class="font-bold font-orbitron text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-times-circle text-red-400"></i> Overdue Books
+                        </h3>
+                        <div id="overdueList" class="space-y-2 text-sm">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Dashboard Logic -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Hide loader
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    // Scroll to section handler
+    document.querySelectorAll('.scroll-to-section').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('href');
+            if (target.startsWith('#')) {
+                const element = document.querySelector(target);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    });
+
+    loadDashboard();
+});
+
+// Check if user is logged in
+function checkAuth() {
+    const user = window.API.auth.getUser();
+    if (!user) {
+        window.location.href = '../auth/student-login.html';
+        return null;
+    }
+    if (user.role !== 'student') {
+        alert('Access Denied: Student dashboard only');
+        window.API.auth.logout();
+        window.location.href = '../index.html';
+        return null;
+    }
+    return user;
+}
+
+// Logout function
+function logout() {
+    window.API.auth.logout();
+    window.location.href = '../index.html';
+}
+
+// Load dashboard data
+async function loadDashboard() {
+    const user = checkAuth();
+    if (!user) return;
+
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('userEmail').textContent = user.email;
+
+    try {
+        // Load student profile
+        const profileResult = await window.API.student.getProfile(user.id);
+        if (profileResult.success) {
+            const student = profileResult.student;
+            document.getElementById('studentRoll').textContent = student.rollNumber || 'N/A';
+            document.getElementById('studentDept').textContent = student.department || 'N/A';
+            document.getElementById('studentSem').textContent = 'Sem ' + (student.semester || 'N/A');
+            document.getElementById('studentCGPA').textContent = student.cgpa ? student.cgpa.toFixed(2) : '0.00';
+            
+            // Resume Check
+            if (student.resumeUrl) {
+                const status = document.getElementById('resumeStatus');
+                status.textContent = 'ACTIVE CV';
+                status.className = 'badge bg-green-500/10 text-green-400 border border-green-500/30 font-bold';
+                
+                document.getElementById('resumeView').classList.remove('hidden');
+                document.getElementById('uploadResumeBtn').classList.add('hidden');
+                document.getElementById('resumeLink').href = `http://localhost:5000${student.resumeUrl}`;
+            }
+
+            // Load Attendance
+            loadAttendance(student._id);
+
+            // Load Exams
+            loadExams(student.courses);
+        }
+
+        // Load academics/transcript
+        const transcriptResult = await window.API.academic.getTranscript(user.id);
+        if (transcriptResult.success && transcriptResult.academics) {
+            loadAcademicsTable(transcriptResult.academics);
+        }
+
+        // Load placement status
+        const placementResult = await window.API.placement.getStudentPlacement(user.id);
+        if (placementResult.success && placementResult.placement && placementResult.placement.status === 'Placed') {
+            const p = placementResult.placement;
+            const badge = document.getElementById('placementStatusBadge');
+            badge.textContent = 'PLACED';
+            badge.className = 'badge bg-green-500/20 text-green-400 border border-green-500/30 font-bold';
+            
+            document.getElementById('placementCompany').textContent = p.companyName;
+            document.getElementById('placementPos').textContent = p.position;
+            document.getElementById('placementSalary').textContent = '₹' + p.salary.toLocaleString();
+            document.getElementById('placementDetails').classList.remove('hidden');
+        }
+
+        // Load courses
+        const coursesResult = await window.API.course.getAllCourses();
+        if (coursesResult.success) {
+            loadCourses(coursesResult.courses || []);
+        }
+
+        // Load library data
+        loadStudentLibraryData(user.id);
+
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+// Load academics table
+function loadAcademicsTable(academics) {
+    const tbody = document.getElementById('academicsTable');
+    tbody.innerHTML = '';
+
+    if (academics.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No academic records found</td></tr>';
+        return;
+    }
+
+    academics.forEach(record => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/5 transition-colors group';
+        
+        let gradeColor = 'text-gray-400';
+        if(record.grade === 'A+' || record.grade === 'A') gradeColor = 'text-green-400';
+        else if(record.grade === 'B+' || record.grade === 'B') gradeColor = 'text-blue-400';
+        else if(record.grade === 'C') gradeColor = 'text-yellow-400';
+        else if(record.grade === 'F') gradeColor = 'text-red-400';
+
+        row.innerHTML = `
+            <td class="px-4 py-3 font-medium text-white">${record.courseId?.courseName || 'Course'}</td>
+            <td class="px-4 py-3 text-gray-400">${record.courseId?.courseCode || 'N/A'}</td>
+            <td class="px-4 py-3 text-center text-gray-300">${record.credits || 0}</td>
+            <td class="px-4 py-3 text-center font-bold ${gradeColor}">${record.grade || 'N/A'}</td>
+            <td class="px-4 py-3 text-center text-gray-300">${record.marks?.total || 0}/100</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Load courses
+function loadCourses(courses) {
+    const coursesList = document.getElementById('coursesList');
+    coursesList.innerHTML = '';
+
+    if (courses.length === 0) {
+        coursesList.innerHTML = '<div class="col-span-2 text-gray-500 text-center py-4">No courses available</div>';
+        return;
+    }
+
+    courses.slice(0, 4).forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 hover:border-gold/50 transition-colors cursor-pointer';
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-bold text-white text-sm truncate pr-2">${course.courseName}</h4>
+                <span class="badge badge-gold text-[10px] py-0.5 px-2">${course.courseCode}</span>
+            </div>
+            <div class="flex justify-between text-xs text-gray-400">
+                <span><i class="fas fa-layer-group mr-1"></i> Sem ${course.semester}</span>
+                <span><i class="fas fa-star mr-1"></i> ${course.credits} Credits</span>
+            </div>
+        `;
+        coursesList.appendChild(card);
+    });
+}
+
+// View transcript
+async function viewTranscript() {
+    const user = window.API.auth.getUser();
+    const result = await window.API.academic.getTranscript(user.id);
+    if (result.success) {
+        alert(`Academic Transcript\n------------------\nCurrent CGPA: ${result.cgpa}\nTotal Course Records: ${result.academics.length}\n\n(Full PDF download feature coming soon)`);
+    }
+}
+
+async function loadExams(courseIds) {
+    try {
+        const result = await window.API.exam.getAll();
+        if (result.success) {
+            const container = document.getElementById('examList');
+            container.innerHTML = '';
+            
+            // Filter exams for student's courses
+            const studentExams = result.exams.filter(e => courseIds.includes(e.course._id));
+
+            if (studentExams.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No exam schedules found.</div>';
+                return;
+            }
+
+            studentExams.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'p-3 bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all';
+                item.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="text-sm font-bold text-white">${e.title}</p>
+                            <p class="text-[10px] text-gold uppercase tracking-widest">${e.course.courseCode} - Sem ${e.semester}</p>
+                        </div>
+                        <span class="text-[10px] px-2 py-1 rounded ${e.resultsDeclared ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'} font-bold">
+                            ${e.resultsDeclared ? 'RESULTS OUT' : 'SCHEDULED'}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 text-[10px] text-gray-400">
+                        <span><i class="far fa-calendar-alt mr-1"></i> ${new Date(e.startDate).toLocaleDateString()}</span>
+                        <span><i class="far fa-clock mr-1"></i> 10:00 AM</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading exams:', error);
+    }
+}
+
+async function loadAttendance(studentId) {
+    try {
+        const result = await window.API.attendance.getStudentSummary(studentId);
+        if (result.success) {
+            const container = document.getElementById('attendanceContainer');
+            container.innerHTML = '';
+            
+            if (result.summary.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No attendance records found yet.</div>';
+                return;
+            }
+
+            let totalPercent = 0;
+            result.summary.forEach(s => {
+                totalPercent += parseFloat(s.percentage);
+                const item = document.createElement('div');
+                item.innerHTML = `
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-300 font-bold">${s.courseCode}</span>
+                        <span class="${parseFloat(s.percentage) < 75 ? 'text-red-400' : 'text-green-400'}">${s.percentage}%</span>
+                    </div>
+                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div class="h-full ${parseFloat(s.percentage) < 75 ? 'bg-red-500' : 'bg-blue-500'} rounded-full" style="width: ${s.percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            const avg = (totalPercent / result.summary.length).toFixed(1);
+            const avgBadge = document.getElementById('avgAttendance');
+            avgBadge.textContent = `${avg}% Avg`;
+            avgBadge.className = `badge ${parseFloat(avg) < 75 ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-blue-500/10 text-blue-400 border-blue-500/30'}`;
+        }
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+    }
+}
+
+// Resume Upload Helpers
+function triggerResumeUpload() {
+    document.getElementById('resumeInput').click();
+}
+
+async function handleResumeUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+        alert('Please upload a PDF file only.');
+        return;
+    }
+
+    const btn = document.getElementById('uploadResumeBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
+    btn.disabled = true;
+
+    try {
+        const result = await window.API.upload.resume(file);
+        if (result.success) {
+            alert('Resume uploaded successfully!');
+            location.reload(); // Refresh to show new resume
+        }
+    } catch (error) {
+        alert('Upload failed: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// ============= STUDENT LIBRARY FUNCTIONS =============
+
+// Load student library data
+async function loadStudentLibraryData(studentId) {
+    try {
+        // Load all books for catalog
+        const booksResult = await window.API.library.getBooks();
+        if (booksResult.success) {
+            displayCatalogBooks(booksResult.books);
+            setupCatalogSearch(booksResult.books);
+        }
+
+        // Load student's issued books
+        const myBooksResult = await window.API.library.getMyBooks(studentId);
+        if (myBooksResult.success) {
+            displayMyBooks(myBooksResult.records);
+        }
+    } catch (error) {
+        console.error('Error loading library data:', error);
+    }
+}
+
+// Display catalog books
+function displayCatalogBooks(books) {
+    const container = document.getElementById('catalogBooksList');
+    container.innerHTML = '';
+
+    if (books.length === 0) {
+        container.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-500"><i class="fas fa-book mr-2"></i> No books available in the library</div>';
+        return;
+    }
+
+    books.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 hover:border-gold/50 transition-all cursor-pointer group';
+        
+        const availabilityClass = book.available === 0 ? 'bg-red-500/20 text-red-400' : book.available <= 2 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400';
+        
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex-1">
+                    <h4 class="font-bold text-white group-hover:text-gold transition-colors line-clamp-2">${book.title}</h4>
+                    <p class="text-xs text-gray-400 mt-1">${book.author}</p>
+                </div>
+                <span class="badge ${availabilityClass} text-[10px] px-2 py-1 whitespace-nowrap ml-2 font-bold">
+                    ${book.available > 0 ? book.available + ' Available' : 'Out of Stock'}
+                </span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                <i class="fas fa-tag"></i> ${book.category}
+                <span class="ml-auto"><i class="fas fa-map-marker-alt"></i> ${book.location}</span>
+            </div>
+            <button onclick="requestBook('${book._id}', '${book.title.replace(/'/g, "\\'")}')" ${book.available === 0 ? 'disabled' : ''} class="w-full py-2 rounded text-xs font-bold transition-colors ${book.available === 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gold/20 text-gold hover:bg-gold/40 border border-gold/30'}">
+                ${book.available === 0 ? 'Not Available' : 'Request Issue'}
+            </button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Display my books
+function displayMyBooks(records) {
+    const container = document.getElementById('myBooksList');
+    container.innerHTML = '';
+
+    if (records.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm"><i class="fas fa-inbox mr-2"></i> No books issued yet</div>';
+        return;
+    }
+
+    let dueSoonCount = 0;
+    let overdueCount = 0;
+    const today = new Date();
+    const dueSoonList = [];
+    const overdueList = [];
+
+    records.forEach(record => {
+        if (record.status !== 'Issued') return; // Skip returned books
+
+        const dueDate = new Date(record.dueDate);
+        const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysLeft < 0) {
+            overdueCount++;
+            overdueList.push({ record, daysLeft });
+        } else if (daysLeft <= 3) {
+            dueSoonCount++;
+            dueSoonList.push({ record, daysLeft });
+        }
+
+        const item = document.createElement('div');
+        let statusColor = 'text-green-400';
+        let statusBg = 'bg-green-500/10 border-green-500/20';
+        
+        if (daysLeft < 0) {
+            statusColor = 'text-red-400';
+            statusBg = 'bg-red-500/10 border-red-500/20';
+        } else if (daysLeft <= 3) {
+            statusColor = 'text-yellow-400';
+            statusBg = 'bg-yellow-500/10 border-yellow-500/20';
+        }
+
+        item.className = `p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors`;
+        item.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex-1">
+                    <p class="font-bold text-white text-sm line-clamp-2">${record.book.title}</p>
+                    <p class="text-xs text-gray-400">${record.book.author}</p>
+                </div>
+            </div>
+            <div class="space-y-1 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Issued:</span>
+                    <span class="text-gray-300">${new Date(record.issueDate).toLocaleDateString()}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Due:</span>
+                    <span class="font-bold ${statusColor}">${new Date(record.dueDate).toLocaleDateString()} (${daysLeft > 0 ? daysLeft + ' days' : 'Overdue by ' + Math.abs(daysLeft) + ' days'})</span>
+                </div>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    // Show alerts for due soon and overdue
+    if (dueSoonCount > 0) {
+        const dueSoonCard = document.getElementById('dueSoonCard');
+        dueSoonCard.style.display = 'block';
+        const dueSoonListEl = document.getElementById('dueSoonList');
+        dueSoonListEl.innerHTML = '';
+        dueSoonList.forEach(({ record, daysLeft }) => {
+            const item = document.createElement('div');
+            item.className = 'p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-yellow-300 text-xs';
+            item.innerHTML = `<strong>${record.book.title}</strong> due in ${daysLeft} day(s)`;
+            dueSoonListEl.appendChild(item);
+        });
+    }
+
+    if (overdueCount > 0) {
+        const overdueCard = document.getElementById('overdueCard');
+        overdueCard.style.display = 'block';
+        const overdueListEl = document.getElementById('overdueList');
+        overdueListEl.innerHTML = '';
+        overdueList.forEach(({ record, daysLeft }) => {
+            const fine = Math.abs(daysLeft) * 10;
+            const item = document.createElement('div');
+            item.className = 'p-2 bg-red-500/10 border border-red-500/20 rounded text-red-300 text-xs';
+            item.innerHTML = `<strong>${record.book.title}</strong> - Fine: ₹${fine}`;
+            overdueListEl.appendChild(item);
+        });
+    }
+}
+
+// Setup catalog search
+function setupCatalogSearch(allBooks) {
+    const searchInput = document.getElementById('catalogSearchInput');
+    const categoryFilter = document.getElementById('catalogCategoryFilter');
+
+    searchInput.addEventListener('input', () => {
+        filterAndDisplayBooks(allBooks);
+    });
+
+    categoryFilter.addEventListener('change', () => {
+        filterAndDisplayBooks(allBooks);
+    });
+}
+
+// Filter and display books
+function filterAndDisplayBooks(allBooks) {
+    const search = document.getElementById('catalogSearchInput').value.toLowerCase();
+    const category = document.getElementById('catalogCategoryFilter').value;
+
+    const filtered = allBooks.filter(book => {
+        const matchesSearch = !search || 
+            book.title.toLowerCase().includes(search) || 
+            book.author.toLowerCase().includes(search);
+        
+        const matchesCategory = !category || book.category === category;
+        
+        return matchesSearch && matchesCategory;
+    });
+
+    displayCatalogBooks(filtered);
+}
+
+// Request book (placeholder - can be enhanced)
+function requestBook(bookId, bookTitle) {
+    alert(`Request submitted for "${bookTitle}"\n\nPlease visit the library or contact the librarian to complete the book issue process.`);
+    // This could be enhanced to show a modal or form for the student to request the book
+}
+
+</script>
+
+</body>
+</html>

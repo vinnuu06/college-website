@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Management | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="../public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js & Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../public/js/three-bg.js"></script>
+    <script src="../public/js/api.js"></script>
+</head>
+
+<body class="bg-black text-gray-200 min-h-screen">
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner" style="border-top-color: var(--red-bright); border-right-color: var(--gold);"></div>
+        <h2 class="loader-text" style="color: var(--red-bright);">SYNCING DIRECTORY</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- DASHBOARD WRAPPER -->
+<div class="relative z-10 flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 glass-card rounded-none border-t-0 border-b-0 border-l-0 flex flex-col hidden md:flex" style="border-right-color: rgba(220, 20, 60, 0.3);">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 gap-3">
+            <i class="fas fa-shield-alt text-2xl" style="color: var(--red-bright);"></i>
+            <span class="font-orbitron font-bold tracking-wider text-white">SYS<span style="color: var(--red-bright);">ADMIN</span></span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2">
+            <a href="admin.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-chart-line w-5"></i> Dashboard
+            </a>
+            <a href="directory.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600/10 text-red-500 border border-red-600/20 transition-colors">
+                <i class="fas fa-users w-5"></i> Directory
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-book w-5"></i> Curriculum
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-briefcase w-5"></i> Placements
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-white/10">
+            <button onclick="window.API.auth.logout(); window.location.href='../index.html'" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors">
+                <i class="fas fa-sign-out-alt w-5"></i> Terminate
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto custom-scrollbar">
+        <header class="h-20 glass-card rounded-none border-t-0 border-l-0 border-r-0 flex items-center justify-between px-8 sticky top-0 z-20" style="border-bottom-color: rgba(220, 20, 60, 0.3);">
+            <h2 class="text-xl font-bold font-orbitron text-white">Directory Management</h2>
+            <div class="flex gap-4">
+                <button onclick="openModal('student')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold transition-all">
+                    <i class="fas fa-user-plus mr-2"></i> Add Student
+                </button>
+                <button onclick="openModal('faculty')" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded text-xs font-bold transition-all">
+                    <i class="fas fa-chalkboard-teacher mr-2"></i> Add Faculty
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto w-full space-y-8 fade-in">
+            <!-- Tabs -->
+            <div class="flex gap-4 border-b border-white/10 pb-4">
+                <button onclick="switchTab('students')" id="tab-students" class="text-sm font-bold font-orbitron pb-2 border-b-2 border-blue-500 text-white px-4">STUDENTS</button>
+                <button onclick="switchTab('faculty')" id="tab-faculty" class="text-sm font-bold font-orbitron pb-2 border-b-2 border-transparent text-gray-500 hover:text-white px-4 transition-all">FACULTY</button>
+            </div>
+
+            <!-- Content Area -->
+            <div id="directory-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Add User Modal -->
+<div id="userModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="glass-card w-full max-w-md relative z-10 border-t-4" id="modalBorder">
+        <h3 id="modalTitle" class="text-xl font-bold font-orbitron text-white mb-6">Register New User</h3>
+        <form id="userForm" class="space-y-4">
+            <input type="hidden" name="role" id="modalRole">
+            <div>
+                <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Full Name</label>
+                <input type="text" name="name" required class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Email (Institutional)</label>
+                <input type="email" name="email" required class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Initial Password</label>
+                <div class="relative">
+                    <input type="password" name="password" required class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500 pr-10">
+                    <div class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="studentFields" class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Roll Number</label>
+                    <input type="text" name="rollNumber" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Semester</label>
+                    <input type="number" name="semester" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div id="facultyFields" class="grid grid-cols-2 gap-4 hidden">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Employee ID</label>
+                    <input type="text" name="employeeId" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Designation</label>
+                    <input type="text" name="designation" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Department</label>
+                <select name="department" class="w-full bg-black border border-white/10 p-2 rounded text-sm text-white focus:outline-none focus:border-blue-500">
+                    <option value="Department of Business Administration">Business Administration</option>
+                    <option value="Department of Commerce">Commerce</option>
+                    <option value="Department of Computer Science">Computer Science</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-bold transition-all mt-4">
+                Finalize Registration
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentTab = 'students';
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    window.API.initPasswordToggles();
+
+    loadDirectory();
+});
+
+async function loadDirectory() {
+    const container = document.getElementById('directory-content');
+    container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching data...</div>';
+
+    try {
+        if (currentTab === 'students') {
+            const result = await window.API.student.getAllStudents();
+            renderStudents(result.students);
+        } else {
+            const result = await window.API.faculty.getAllFaculty();
+            renderFaculty(result.faculty);
+        }
+    } catch (error) {
+        container.innerHTML = `<div class="col-span-3 text-center py-12 text-red-500">Error: ${error.message}</div>`;
+    }
+}
+
+function renderStudents(students) {
+    const container = document.getElementById('directory-content');
+    container.innerHTML = '';
+    
+    if (!students || students.length === 0) {
+        container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500">No students registered in the database.</div>';
+        return;
+    }
+
+    students.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'glass-card border-l-4 border-l-blue-500';
+        card.innerHTML = `
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center border border-blue-500/30 text-blue-400 font-bold">
+                    ${(s.userId?.name || 'S').charAt(0)}
+                </div>
+                <div>
+                    <h4 class="font-bold text-white">${s.userId?.name || 'Student'}</h4>
+                    <p class="text-xs text-gray-400">${s.rollNumber}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-widest text-gray-500 mb-4">
+                <div>Dept: <span class="text-white">${s.department}</span></div>
+                <div>Sem: <span class="text-white">${s.semester}</span></div>
+            </div>
+            <div class="flex gap-2">
+                <button class="flex-1 bg-white/5 hover:bg-white/10 text-xs py-1.5 rounded transition-all">Profile</button>
+                <button class="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded transition-all"><i class="fas fa-trash-alt text-xs"></i></button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderFaculty(faculty) {
+    const container = document.getElementById('directory-content');
+    container.innerHTML = '';
+    
+    if (!faculty || faculty.length === 0) {
+        container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500">No faculty registered in the database.</div>';
+        return;
+    }
+
+    faculty.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'glass-card border-l-4 border-l-purple-500';
+        card.innerHTML = `
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center border border-purple-500/30 text-purple-400 font-bold">
+                    ${(f.userId?.name || 'F').charAt(0)}
+                </div>
+                <div>
+                    <h4 class="font-bold text-white">${f.userId?.name || 'Faculty'}</h4>
+                    <p class="text-xs text-gray-400">${f.employeeId}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-widest text-gray-500 mb-4">
+                <div>Dept: <span class="text-white">${f.department}</span></div>
+                <div>Role: <span class="text-white">${f.designation}</span></div>
+            </div>
+            <div class="flex gap-2">
+                <button class="flex-1 bg-white/5 hover:bg-white/10 text-xs py-1.5 rounded transition-all">Manage</button>
+                <button class="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded transition-all"><i class="fas fa-trash-alt text-xs"></i></button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-students').className = tab === 'students' ? 'text-sm font-bold font-orbitron pb-2 border-b-2 border-blue-500 text-white px-4' : 'text-sm font-bold font-orbitron pb-2 border-b-2 border-transparent text-gray-500 hover:text-white px-4 transition-all';
+    document.getElementById('tab-faculty').className = tab === 'faculty' ? 'text-sm font-bold font-orbitron pb-2 border-b-2 border-purple-500 text-white px-4' : 'text-sm font-bold font-orbitron pb-2 border-b-2 border-transparent text-gray-500 hover:text-white px-4 transition-all';
+    loadDirectory();
+}
+
+function openModal(role) {
+    document.getElementById('modalRole').value = role;
+    document.getElementById('modalTitle').textContent = `Register New ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+    document.getElementById('modalBorder').style.borderTopColor = role === 'student' ? '#3b82f6' : '#a855f7';
+    
+    if (role === 'student') {
+        document.getElementById('studentFields').classList.remove('hidden');
+        document.getElementById('facultyFields').classList.add('hidden');
+    } else {
+        document.getElementById('studentFields').classList.add('hidden');
+        document.getElementById('facultyFields').classList.remove('hidden');
+    }
+    
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('userModal').classList.add('hidden');
+    document.getElementById('userForm').reset();
+}
+
+document.getElementById('userForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const result = await window.API.auth.register(data);
+        if (result.success) {
+            alert('User registered successfully!');
+            closeModal();
+            loadDirectory();
+        }
+    } catch (error) {
+        alert('Registration failed: ' + error.message);
+    }
+});
+</script>
+</body>
+</html>

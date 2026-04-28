@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Login | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="../public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../public/js/three-bg.js"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner"></div>
+        <h2 class="loader-text">ACCESSING PORTAL</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<div class="w-full max-w-md relative z-10 fade-in">
+    <!-- Back to Home -->
+    <a href="../index.html" class="inline-flex items-center text-gray-400 hover:text-gold mb-8 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Home
+    </a>
+
+    <div class="glass-card">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 mx-auto flex items-center justify-center mb-4">
+                <img src="../public/images/logo.png" alt="BBC Logo" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-3xl font-bold font-orbitron text-white">Faculty <span style="color: var(--gold);">Portal</span></h2>
+            <p class="text-gray-400 mt-2 text-sm">Sign in to manage academics</p>
+        </div>
+
+        <div id="login-alert" class="hidden mb-6 p-3 rounded text-sm text-center"></div>
+
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label class="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Email Address</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-500"></i>
+                    </div>
+                    <input type="email" id="email" required class="input-field pl-10" placeholder="faculty@ballari.edu" value="venkatesulu@ballari.edu">
+                </div>
+            </div>
+            
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs text-gray-400 uppercase tracking-wide">Password</label>
+                    <a href="#" class="text-xs text-gold hover:underline">Forgot password?</a>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-500"></i>
+                    </div>
+                    <input type="password" id="password" required class="input-field pl-10 pr-12" placeholder="••••••••" value="faculty123">
+                    <div class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-primary w-full justify-center">
+                Access Portal <i class="fas fa-sign-in-alt ml-2"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- API SCRIPT -->
+<script src="../public/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize UI helpers
+    if(window.API && window.API.initPasswordToggles) {
+        window.API.initPasswordToggles();
+    }
+    
+    // Hide loader
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    window.API.initPasswordToggles();
+
+    // Redirect if already logged in
+    if(window.API.auth.isLoggedIn()) {
+        const user = window.API.auth.getUser();
+        if(user && user.role === 'faculty') {
+            window.location.href = '../dashboard/faculty.html';
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submit-btn');
+        const alertBox = document.getElementById('login-alert');
+        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Authenticating...';
+        btn.disabled = true;
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const result = await window.API.auth.login(email, password);
+            
+            if(result.success && result.user.role === 'faculty') {
+                alertBox.className = 'mb-6 p-3 rounded text-sm text-center bg-green-500/20 border border-green-500/50 text-green-400';
+                alertBox.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Login successful! Redirecting...';
+                alertBox.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    window.location.href = '../dashboard/faculty.html';
+                }, 1000);
+            } else if (result.success && result.user.role !== 'faculty') {
+                // Wrong portal
+                window.API.auth.logout();
+                throw new Error('Please use the correct portal for your role.');
+            }
+        } catch(error) {
+            alertBox.className = 'mb-6 p-3 rounded text-sm text-center bg-red-500/20 border border-red-500/50 text-red-400';
+            alertBox.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ${error.message || 'Login failed'}`;
+            alertBox.classList.remove('hidden');
+            
+            btn.innerHTML = 'Sign In <i class="fas fa-sign-in-alt ml-2"></i>';
+            btn.disabled = false;
+        }
+    });
+});
+</script>
+
+</body>
+</html>

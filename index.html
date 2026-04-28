@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BALLARI BUSINESS COLLEGE | Excellence in Commerce & Tech</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="public/css/theme.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- PWA Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d4af37">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2997/2997313.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+
+    <!-- Three.js & Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="public/js/three-bg.js"></script>
+</head>
+
+<body>
+
+    <!-- Search Overlay -->
+    <div id="searchOverlay"
+        class="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl hidden opacity-0 transition-all duration-300">
+        <div class="max-w-4xl mx-auto px-6 pt-24">
+            <div class="flex items-center justify-between mb-12">
+                <h2 class="text-3xl font-orbitron font-bold text-white">GLOBAL <span class="text-gold">SEARCH</span>
+                </h2>
+                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white text-4xl">&times;</button>
+            </div>
+
+            <div class="relative">
+                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gold text-xl"></i>
+                <input type="text" id="searchInput" onkeyup="handleSearch(event)"
+                    placeholder="Search courses, faculty, or events..."
+                    class="w-full bg-white/5 border-b-2 border-gold/30 p-6 pl-16 text-2xl text-white font-orbitron focus:outline-none focus:border-gold transition-colors">
+            </div>
+
+            <div id="searchResults" class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Results will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="flex flex-col items-center">
+            <div class="loader-spinner"></div>
+            <h2 class="loader-text">INITIALIZING CAMPUS</h2>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- NAVBAR -->
+    <nav class="nav-glass">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-20">
+
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="relative w-12 h-12 flex items-center justify-center">
+                        <img src="public/images/logo.png" alt="BBC Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider text-white">
+                        BALLARI<span style="color: var(--red-bright);">BUSINESS</span>COLLEGE
+                    </span>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex space-x-8 items-center text-sm font-semibold tracking-wide">
+                    <a href="index.html" class="nav-link" style="color: var(--gold);">Home</a>
+                    <a href="about.html" class="nav-link text-gray-300 hover:text-white">About</a>
+                    <a href="courses.html" class="nav-link text-gray-300 hover:text-white">Academics</a>
+                    <a href="faculty.html" class="nav-link text-gray-300 hover:text-white">Faculty</a>
+                    <a href="admissions.html" class="nav-link text-gray-300 hover:text-white">Admissions</a>
+                    <a href="placements.html" class="nav-link text-gray-300 hover:text-white">Placements</a>
+                    <a href="contact.html" class="nav-link text-gray-300 hover:text-white">Contact</a>
+
+                    <!-- Search Button -->
+                    <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition-colors p-2">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
+
+                    <!-- Login Dropdown -->
+                    <div class="relative group">
+                        <button class="btn-primary" style="padding: 10px 20px;">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Portals
+                        </button>
+
+                        <div class="absolute right-0 mt-2 w-56 glass-card p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100"
+                            style="z-index: 100; border-radius: 12px; padding: 10px;">
+                            <a href="auth/student-login.html"
+                                class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                                <i class="fas fa-user-graduate w-6 text-center" style="color: var(--gold);"></i> Student
+                                Portal
+                            </a>
+                            <a href="auth/faculty-login.html"
+                                class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white mt-1">
+                                <i class="fas fa-chalkboard-teacher w-6 text-center" style="color: var(--gold);"></i>
+                                Faculty Portal
+                            </a>
+                            <div class="h-px bg-white/10 my-2"></div>
+                            <a href="auth/admin-login.html"
+                                class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                                <i class="fas fa-shield-alt w-6 text-center" style="color: var(--red-bright);"></i>
+                                Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button class="text-white hover:text-gold focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- HERO SECTION -->
+    <section class="relative flex items-center pt-20 pb-20 md:min-h-screen overflow-hidden">
+        <!-- Campus Image Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="public/images/campus.png" alt="BBC Campus" class="w-full h-full object-cover opacity-20 md:opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center w-full">
+            <div
+                class="inline-block mb-6 px-4 py-1 rounded-full border border-gold/30 bg-gold/5 backdrop-blur-sm fade-in">
+                <span class="text-sm font-semibold tracking-wider uppercase" style="color: var(--gold);">Admissions Open
+                    2026-27</span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl lg:text-8xl font-black font-orbitron mb-6 leading-tight fade-in fade-in-delay-1">
+                <span class="gradient-text-gold">NEXT-GEN</span><br>
+                <span class="text-white">EDUCATION</span>
+            </h1>
+
+            <p class="mt-6 max-w-2xl mx-auto text-base md:text-lg lg:text-xl text-gray-300 mb-8 md:mb-12 font-light fade-in fade-in-delay-2">
+                Empowering future leaders with cutting-edge knowledge in Commerce, Management, and Technology.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center fade-in fade-in-delay-3">
+                <a href="courses.html" class="btn-primary w-full sm:w-auto">
+                    Explore Programs <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="admissions.html" class="btn-outline w-full sm:w-auto">
+                    Apply Now <i class="fas fa-paper-plane ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Stats Row -->
+            <div
+                class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-16 md:mt-24 fade-in fade-in-delay-4 border-t border-white/10 pt-8 md:pt-12">
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold font-orbitron text-white">25+</div>
+                    <div class="text-xs md:text-sm text-gray-400 mt-2 tracking-widest uppercase">Years Legacy</div>
+                </div>
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold font-orbitron" style="color: var(--gold);">95%</div>
+                    <div class="text-xs md:text-sm text-gray-400 mt-2 tracking-widest uppercase">Placement Rate</div>
+                </div>
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold font-orbitron text-white">50+</div>
+                    <div class="text-xs md:text-sm text-gray-400 mt-2 tracking-widest uppercase">Top Recruiters</div>
+                </div>
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold font-orbitron" style="color: var(--red-bright);">A+</div>
+                    <div class="text-xs md:text-sm text-gray-400 mt-2 tracking-widest uppercase">NAAC Grade</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QUICK FEATURES -->
+    <section class="py-20 relative z-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 glow-border"
+                        style="background: var(--gold-dim);">
+                        <i class="fas fa-laptop-code text-3xl" style="color: var(--gold);"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-orbitron text-white mb-3">Modern Curriculum</h3>
+                    <p class="text-gray-400">Industry-aligned syllabi updated regularly to match global technological
+                        and business trends.</p>
+                </div>
+
+                <div class="glass-card hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 glow-border"
+                        style="background: var(--red-dim);">
+                        <i class="fas fa-chart-line text-3xl" style="color: var(--red-bright);"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-orbitron text-white mb-3">Career Growth</h3>
+                    <p class="text-gray-400">Dedicated placement cell offering internships and recruitment drives with
+                        top multinational companies.</p>
+                </div>
+
+                <div class="glass-card hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 glow-border"
+                        style="background: var(--gold-dim);">
+                        <i class="fas fa-users text-3xl" style="color: var(--gold);"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-orbitron text-white mb-3">Expert Faculty</h3>
+                    <p class="text-gray-400">Learn from experienced academicians and industry professionals dedicated to
+                        student success.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 bg-black/60 backdrop-blur-lg pt-16 pb-8 relative z-10 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-graduation-cap text-2xl" style="color: var(--gold);"></i>
+                        <span class="font-orbitron font-bold text-xl tracking-wider text-white">
+                            BELLARI<span style="color: var(--red-bright);">BUSINESS</span>COLLEGE
+                        </span>
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">Shaping the future leaders of tomorrow through excellence in
+                        education, innovation, and holistic development.</p>
+                    <div class="flex gap-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-gold/20 hover:text-gold transition-colors"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-gold/20 hover:text-gold transition-colors"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-gold/20 hover:text-gold transition-colors"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-gold/20 hover:text-gold transition-colors"><i
+                                class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-orbitron font-bold text-white mb-6 uppercase tracking-wider text-sm">Quick Links
+                    </h4>
+                    <ul class="space-y-3">
+                        <li><a href="about.html" class="text-gray-400 hover:text-gold transition-colors">About Us</a>
+                        </li>
+                        <li><a href="courses.html" class="text-gray-400 hover:text-gold transition-colors">Academic
+                                Programs</a></li>
+                        <li><a href="admissions.html"
+                                class="text-gray-400 hover:text-gold transition-colors">Admissions</a></li>
+                        <li><a href="placements.html" class="text-gray-400 hover:text-gold transition-colors">Placement
+                                Cell</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-orbitron font-bold text-white mb-6 uppercase tracking-wider text-sm">Contact Us</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1" style="color: var(--gold);"></i>
+                            <span class="text-gray-400">Ward No. 35, Ganesh Nagar, Opp. KSRTC Bus Depot, Siruguppa Road,
+                                Ballari, Karnataka - 583103</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone-alt" style="color: var(--gold);"></i>
+                            <span class="text-gray-400">08392 266777 / 268777</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope" style="color: var(--gold);"></i>
+                            <span class="text-gray-400">bbcbellary@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-500 text-sm">© 2026 Ballari Business College. Affiliated to VSKU, Ballari. All
+                    Rights Reserved.</p>
+                <div class="flex gap-6 text-sm">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide loader
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('fade-out');
+                    setTimeout(() => loader.remove(), 600);
+                }
+            }, 1500);
+
+            // Navbar scroll effect
+            const nav = document.querySelector('.nav-glass');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.style.background = 'rgba(5, 5, 5, 0.95)';
+                    nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.5)';
+                } else {
+                    nav.style.background = 'rgba(5, 5, 5, 0.7)';
+                    nav.style.boxShadow = 'none';
+                }
+            });
+        });
+
+        // Search Logic
+        function toggleSearch() {
+            const overlay = document.getElementById('searchOverlay');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    document.getElementById('searchInput').focus();
+                }, 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        let searchTimeout;
+        async function handleSearch(event) {
+            const query = event.target.value.trim();
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const result = await window.API.search.query(query);
+                    if (result.success) {
+                        renderSearchResults(result.results);
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            }, 300);
+        }
+
+        function renderSearchResults(results) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+
+            // Render Courses
+            if (results.courses.length > 0) {
+                const section = createSearchSection('Courses', 'fa-book-open', 'text-gold');
+                results.courses.forEach(c => {
+                    section.appendChild(createResultItem(c.courseName, c.courseCode, `courses.html#${c.courseCode}`));
+                });
+                container.appendChild(section);
+            }
+
+            // Render Faculty
+            if (results.faculty.length > 0) {
+                const section = createSearchSection('Faculty', 'fa-user-tie', 'text-blue-400');
+                results.faculty.forEach(f => {
+                    section.appendChild(createResultItem(f.userId.name, f.department, 'faculty.html'));
+                });
+                container.appendChild(section);
+            }
+
+            // Render Events
+            if (results.events.length > 0) {
+                const section = createSearchSection('Events', 'fa-calendar-alt', 'text-red-400');
+                results.events.forEach(e => {
+                    section.appendChild(createResultItem(e.title, e.category, 'index.html#events'));
+                });
+                container.appendChild(section);
+            }
+
+            if (container.innerHTML === '') {
+                container.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-12">No results found for your query.</div>';
+            }
+        }
+
+        function createSearchSection(title, icon, colorClass) {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <h3 class="text-sm font-orbitron font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fas ${icon} ${colorClass}"></i> ${title}
+                </h3>
+                <div class="space-y-2"></div>
+            `;
+            return div;
+        }
+
+        function createResultItem(title, sub, link) {
+            const a = document.createElement('a');
+            a.href = link;
+            a.className = 'block p-4 bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 hover:border-gold/30 transition-all group';
+            a.innerHTML = `
+                <p class="text-white font-bold group-hover:text-gold transition-colors">${title}</p>
+                <p class="text-xs text-gray-500 uppercase">${sub}</p>
+            `;
+            return a;
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API DEBUGGER | BBC</title>
+    <style>
+        body { background: #050505; color: white; font-family: monospace; padding: 20px; }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .box { border: 1px solid #333; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>BBC API CONNECTION DEBUGGER</h1>
+    
+    <div class="box">
+        <h3>Step 1: Check Backend Availability</h3>
+        <button onclick="checkHealth()">Test Connection to 127.0.0.1:5000</button>
+        <p id="health-result">--</p>
+    </div>
+
+    <div class="box">
+        <h3>Step 2: Test Admin Login</h3>
+        <button onclick="testLogin()">Attempt Login (admin@ballari.edu)</button>
+        <pre id="login-result">--</pre>
+    </div>
+
+    <script src="public/js/api.js"></script>
+    <script>
+        async function checkHealth() {
+            const res = document.getElementById('health-result');
+            res.innerText = "Checking...";
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/health');
+                const data = await response.json();
+                res.innerHTML = `<span class="success">ONLINE! ✅ (Status: ${response.status})</span>`;
+            } catch (e) {
+                res.innerHTML = `<span class="error">OFFLINE! ❌ Error: ${e.message}</span>`;
+            }
+        }
+
+        async function testLogin() {
+            const res = document.getElementById('login-result');
+            res.innerText = "Testing...";
+            try {
+                const result = await window.API.auth.login('admin@ballari.edu', 'admin123');
+                res.innerHTML = `<span class="success">LOGIN SUCCESS! 🎉</span>\n` + JSON.stringify(result, null, 2);
+            } catch (e) {
+                res.innerHTML = `<span class="error">LOGIN FAILED! ❌</span>\nError: ${e.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

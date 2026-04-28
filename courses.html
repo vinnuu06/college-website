@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Programs | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="public/js/three-bg.js"></script>
+</head>
+
+<body>
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner"></div>
+        <h2 class="loader-text">LOADING PROGRAMS</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- NAVBAR -->
+<nav class="nav-glass">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-20">
+
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="relative w-12 h-12 flex items-center justify-center">
+                        <img src="public/images/logo.png" alt="BBC Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider text-white">
+                        BALLARI<span style="color: var(--red-bright);">BUSINESS</span>COLLEGE
+                    </span>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex space-x-8 items-center text-sm font-semibold tracking-wide">
+                <a href="index.html" class="nav-link text-gray-300 hover:text-white">Home</a>
+                <a href="about.html" class="nav-link text-gray-300 hover:text-white">About</a>
+                <a href="courses.html" class="nav-link" style="color: var(--gold);">Academics</a>
+                <a href="faculty.html" class="nav-link text-gray-300 hover:text-white">Faculty</a>
+                <a href="admissions.html" class="nav-link text-gray-300 hover:text-white">Admissions</a>
+                <a href="placements.html" class="nav-link text-gray-300 hover:text-white">Placements</a>
+                <a href="contact.html" class="nav-link text-gray-300 hover:text-white">Contact</a>
+
+                <!-- Login Dropdown -->
+                <div class="relative group">
+                    <button class="btn-primary" style="padding: 10px 20px;">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Portals
+                    </button>
+                    
+                    <div class="absolute right-0 mt-2 w-56 glass-card p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100" style="z-index: 100; border-radius: 12px; padding: 10px;">
+                        <a href="auth/student-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                            <i class="fas fa-user-graduate w-6 text-center" style="color: var(--gold);"></i> Student Portal
+                        </a>
+                        <a href="auth/faculty-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white mt-1">
+                            <i class="fas fa-chalkboard-teacher w-6 text-center" style="color: var(--gold);"></i> Faculty Portal
+                        </a>
+                        <div class="h-px bg-white/10 my-2"></div>
+                        <a href="auth/admin-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                            <i class="fas fa-shield-alt w-6 text-center" style="color: var(--red-bright);"></i> Admin Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button class="text-white hover:text-gold focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HEADER SECTION -->
+<header class="pt-24 md:pt-32 pb-12 md:pb-16 relative z-10 text-center">
+    <div class="max-w-4xl mx-auto px-6">
+        <h1 class="text-3xl md:text-4xl lg:text-6xl font-black font-orbitron mb-4 fade-in">
+            <span class="gradient-text-gold">ACADEMIC</span> PROGRAMS
+        </h1>
+        <div class="section-divider fade-in fade-in-delay-1"></div>
+        <p class="text-base md:text-lg lg:text-xl text-gray-300 font-light fade-in fade-in-delay-2 mt-6">
+            Discover our industry-aligned undergraduate programs designed to forge the leaders of tomorrow.
+        </p>
+    </div>
+</header>
+
+<!-- COURSES LISTING -->
+<section class="py-12 relative z-10">
+    <div class="max-w-7xl mx-auto px-6">
+        <div id="courses-container" class="grid lg:grid-cols-3 gap-8">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+    </div>
+</section>
+
+<!-- API SCRIPT -->
+<script src="public/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Hide loader
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    const coursesContainer = document.getElementById('courses-container');
+    
+    try {
+        const data = await window.API.course.getAllCourses();
+        if(data.success && data.courses.length > 0) {
+            let html = '';
+            data.courses.forEach((course, index) => {
+                const delay = index * 0.15;
+                const iconClass = course.courseCode === 'BCA' ? 'fa-laptop-code' : 
+                                 course.courseCode === 'BBA' ? 'fa-chart-pie' : 'fa-calculator';
+                
+                html += `
+                <div class="glass-card hover:-translate-y-2 transition-transform duration-300 fade-in flex flex-col" style="animation-delay: ${delay}s">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center glow-border" style="background: var(--gold-dim);">
+                            <i class="fas ${iconClass} text-3xl" style="color: var(--gold);"></i>
+                        </div>
+                        <span class="badge badge-gold">Duration: ${course.duration} Years</span>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold font-orbitron text-white mb-2">${course.courseCode}</h2>
+                    <h3 class="text-lg text-gray-300 mb-4" style="color: var(--gold);">${course.courseName}</h3>
+                    
+                    <p class="text-gray-400 mb-6 flex-grow">
+                        ${course.description}
+                    </p>
+                    
+                    <div class="space-y-3 mb-8">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-check-circle mt-1" style="color: var(--red-bright);"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Eligibility</h4>
+                                <p class="text-xs text-gray-400">${course.eligibility}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-users mt-1" style="color: var(--red-bright);"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Capacity</h4>
+                                <p class="text-xs text-gray-400">${course.totalSeats} Seats</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="admissions.html?course=${course._id}" class="btn-outline w-full text-center justify-center">
+                        Apply Now
+                    </a>
+                </div>
+                `;
+            });
+            coursesContainer.innerHTML = html;
+        } else {
+            coursesContainer.innerHTML = `
+                <div class="col-span-3 text-center py-20">
+                    <i class="fas fa-exclamation-triangle text-4xl text-gray-500 mb-4"></i>
+                    <h3 class="text-xl text-white">No courses available at the moment.</h3>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        coursesContainer.innerHTML = `
+            <div class="col-span-3 text-center py-20">
+                <i class="fas fa-plug text-4xl text-red-500 mb-4"></i>
+                <h3 class="text-xl text-white">Failed to connect to the server.</h3>
+                <p class="text-gray-400">Please make sure the backend API is running.</p>
+            </div>
+        `;
+    }
+
+    // Navbar scroll effect
+    const nav = document.querySelector('.nav-glass');
+    window.addEventListener('scroll', () => {
+        if(window.scrollY > 50) {
+            nav.style.background = 'rgba(5, 5, 5, 0.95)';
+            nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.5)';
+        } else {
+            nav.style.background = 'rgba(5, 5, 5, 0.7)';
+            nav.style.boxShadow = 'none';
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="../public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Three.js & Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../public/js/three-bg.js"></script>
+    <script src="../public/js/api.js"></script>
+    <script src="../public/js/socket-client.js"></script>
+</head>
+
+<body class="bg-black text-gray-200 min-h-screen">
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner" style="border-top-color: var(--red-bright); border-right-color: var(--gold);"></div>
+        <h2 class="loader-text" style="color: var(--red-bright);">INITIALIZING SYSTEM</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- DASHBOARD WRAPPER -->
+<div class="relative z-10 flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 glass-card rounded-none border-t-0 border-b-0 border-l-0 flex flex-col hidden md:flex" style="border-right-color: rgba(220, 20, 60, 0.3);">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 gap-3">
+            <i class="fas fa-shield-alt text-2xl" style="color: var(--red-bright);"></i>
+            <span class="font-orbitron font-bold tracking-wider text-white">SYS<span style="color: var(--red-bright);">ADMIN</span></span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600/10 text-red-500 border border-red-600/20 transition-colors">
+                <i class="fas fa-chart-line w-5"></i> Dashboard
+            </a>
+            <a href="directory.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-users w-5"></i> Directory
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-book w-5"></i> Curriculum
+            </a>
+            <a href="#librarySection" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors scroll-to-section">
+                <i class="fas fa-library w-5"></i> Library
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-briefcase w-5"></i> Placements
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-bullhorn w-5"></i> Broadcasts
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-white/10">
+            <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors">
+                <i class="fas fa-sign-out-alt w-5"></i> Terminate Session
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="h-20 glass-card rounded-none border-t-0 border-l-0 border-r-0 flex items-center justify-between px-8 sticky top-0 z-20" style="border-bottom-color: rgba(220, 20, 60, 0.3);">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-gray-400 hover:text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-xl font-bold font-orbitron text-white">System Command Center</h2>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-white" id="userName">Administrator</p>
+                    <p class="text-xs text-gray-400">admin@bellari.edu</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-black flex items-center justify-center font-bold text-white border border-red-500/50 glow-border" style="box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Body -->
+        <div class="p-8 max-w-7xl mx-auto w-full space-y-8 fade-in">
+            
+            <!-- Statistics Overview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Total Students -->
+                <div class="glass-card flex flex-col items-center justify-center p-6 text-center border-t-4 border-t-blue-500">
+                    <i class="fas fa-user-graduate text-2xl text-blue-400 mb-2"></i>
+                    <h3 class="text-3xl font-bold text-white font-orbitron mb-1" id="totalStudents">0</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">Total Students</p>
+                </div>
+                
+                <!-- Placed Students -->
+                <div class="glass-card flex flex-col items-center justify-center p-6 text-center border-t-4 border-t-green-500">
+                    <i class="fas fa-briefcase text-2xl text-green-400 mb-2"></i>
+                    <h3 class="text-3xl font-bold text-white font-orbitron mb-1" id="placedStudents">0</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">Placed</p>
+                </div>
+                
+                <!-- Placement Rate -->
+                <div class="glass-card flex flex-col items-center justify-center p-6 text-center border-t-4 border-t-gold">
+                    <i class="fas fa-chart-line text-2xl" style="color: var(--gold); mb-2"></i>
+                    <h3 class="text-3xl font-bold text-white font-orbitron mb-1" id="placementRate">0%</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">Placement Rate</p>
+                </div>
+                
+                <!-- Avg Salary -->
+                <div class="glass-card flex flex-col items-center justify-center p-6 text-center border-t-4 border-t-red-500">
+                    <i class="fas fa-rupee-sign text-2xl text-red-500 mb-2"></i>
+                    <h3 class="text-3xl font-bold text-white font-orbitron mb-1" id="avgSalary">0</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">Avg LPA</p>
+                </div>
+            </div>
+
+            <!-- Management Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Center/Left Column (Takes 2/3) -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Top Companies -->
+                    <div class="glass-card">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-building mr-2" style="color: var(--gold);"></i> Top Recruiters
+                            </h3>
+                            <span class="badge badge-gold">Current Year</span>
+                        </div>
+                        
+                        <div id="topCompaniesList" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="col-span-3 text-center py-6 text-gray-500">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Aggregating data...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Academic Analytics -->
+                    <div class="glass-card">
+                        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-chart-area mr-2 text-blue-400"></i> Enrollment Trends
+                            </h3>
+                            <select class="bg-white/5 border border-white/10 text-[10px] text-gray-400 p-1 rounded uppercase">
+                                <option>Current Year</option>
+                                <option>Last 3 Years</option>
+                            </select>
+                        </div>
+                        <canvas id="enrollmentChart" height="200"></canvas>
+                    </div>
+
+                    <!-- Form Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Create Course -->
+                        <div class="glass-card bg-black/40 border-l-2 border-l-blue-500">
+                            <h3 class="font-bold font-orbitron text-white mb-4"><i class="fas fa-plus-circle text-blue-400 mr-2"></i> New Course</h3>
+                            <form id="courseForm" class="space-y-4">
+                                <div>
+                                    <input type="text" name="courseCode" required placeholder="Course Code (e.g. CS101)" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div>
+                                    <input type="text" name="courseName" required placeholder="Course Name" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div>
+                                    <input type="number" name="credits" required placeholder="Credits" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-sm font-bold transition-colors">
+                                    Register Course
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Create Event -->
+                        <div class="glass-card bg-black/40 border-l-2 border-l-purple-500">
+                            <h3 class="font-bold font-orbitron text-white mb-4"><i class="fas fa-calendar-plus text-purple-400 mr-2"></i> Post Event/News</h3>
+                            <form id="eventForm" class="space-y-4">
+                                <div>
+                                    <input type="text" name="title" required placeholder="Event Title" class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:border-purple-500 focus:outline-none transition-colors">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="date" name="date" required class="w-full bg-white/5 border border-white/10 p-2 rounded text-sm text-white focus:border-purple-500 focus:outline-none">
+                                    <select name="eventType" class="w-full bg-black border border-white/10 p-2 rounded text-sm text-white">
+                                        <option value="fest">Fest</option>
+                                        <option value="workshop">Workshop</option>
+                                        <option value="placement_drive">Placement</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded text-sm font-bold transition-colors">
+                                    Broadcast Event
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-8">
+                    
+                    <!-- Recent Placements -->
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold font-orbitron text-white mb-4 border-b border-white/10 pb-4">
+                            <i class="fas fa-history mr-2 text-green-400"></i> Recent Placements
+                        </h3>
+                        <div id="recentPlacements" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                            <div class="text-center py-4 text-gray-500">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Directory Snippet -->
+                    <div class="glass-card">
+                        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
+                            <h3 class="text-lg font-bold font-orbitron text-white">
+                                <i class="fas fa-chalkboard-teacher mr-2 text-purple-400"></i> Faculty Directory
+                            </h3>
+                            <button class="text-xs text-gray-400 hover:text-white transition-colors">View All</button>
+                        </div>
+                        <div id="facultyList" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                            <div class="text-center py-4 text-gray-500">Loading directory...</div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+            </div>
+
+            <!-- LIBRARY MANAGEMENT SECTION -->
+            <div id="librarySection" class="space-y-8 pt-8 border-t border-white/10">
+                <h2 class="text-2xl font-bold font-orbitron text-white flex items-center gap-3">
+                    <i class="fas fa-book-open" style="color: var(--gold);"></i> Library Management
+                </h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column (2/3) -->
+                    <div class="lg:col-span-2 space-y-8">
+                        <!-- Add New Book -->
+                        <div class="glass-card bg-black/40 border-l-4 border-l-blue-500">
+                            <h3 class="font-bold font-orbitron text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-plus-circle text-blue-400"></i> Add New Book
+                            </h3>
+                            <form id="addBookForm" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" name="title" required placeholder="Book Title" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <input type="text" name="author" required placeholder="Author Name" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" name="isbn" placeholder="ISBN (Optional)" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <select name="category" required class="bg-black border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500">
+                                        <option value="">Select Category</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Business">Business</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="Literature">Literature</option>
+                                        <option value="Science">Science</option>
+                                        <option value="History">History</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <input type="number" name="quantity" required placeholder="Quantity" min="1" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <input type="text" name="location" required placeholder="Shelf Location (e.g., A-1)" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <input type="text" name="coverUrl" placeholder="Cover Image URL" class="bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-plus"></i> Add Book to Library
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Search & Filter Inventory -->
+                        <div class="glass-card">
+                            <h3 class="font-bold font-orbitron text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-search" style="color: var(--gold);"></i> Library Inventory
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-3">
+                                    <input type="text" id="bookSearchInput" placeholder="Search books by title or author..." class="flex-1 bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-gold focus:outline-none transition-colors">
+                                    <select id="inventoryFilterSelect" class="bg-black border border-white/10 p-3 rounded text-sm text-white">
+                                        <option value="">All Books</option>
+                                        <option value="low">Low Stock</option>
+                                        <option value="unavailable">Out of Stock</option>
+                                    </select>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="text-xs text-gray-400 uppercase bg-white/5">
+                                            <tr>
+                                                <th class="px-4 py-3 rounded-l-lg">Title</th>
+                                                <th class="px-4 py-3">Author</th>
+                                                <th class="px-4 py-3 text-center">Total</th>
+                                                <th class="px-4 py-3 text-center">Available</th>
+                                                <th class="px-4 py-3 text-center rounded-r-lg">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="inventoryTable" class="divide-y divide-white/5">
+                                            <tr>
+                                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading inventory...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column (1/3) -->
+                    <div class="space-y-8">
+                        <!-- Library Stats -->
+                        <div class="glass-card border-t-4 border-t-gold">
+                            <h3 class="font-bold font-orbitron text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-chart-bar text-gold"></i> Library Statistics
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                                    <p class="text-xs text-gray-400 uppercase mb-1">Total Books</p>
+                                    <p class="text-3xl font-bold text-white font-orbitron" id="totalBooks">0</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                                    <p class="text-xs text-gray-400 uppercase mb-1">Available Now</p>
+                                    <p class="text-3xl font-bold text-green-400 font-orbitron" id="availableBooks">0</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                                    <p class="text-xs text-gray-400 uppercase mb-1">Currently Issued</p>
+                                    <p class="text-3xl font-bold text-blue-400 font-orbitron" id="issuedBooks">0</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4 border border-red-500/20 border">
+                                    <p class="text-xs text-red-400 uppercase mb-1">Overdue Books</p>
+                                    <p class="text-3xl font-bold text-red-400 font-orbitron" id="overdueBooks">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Issue Book Form -->
+                        <div class="glass-card bg-black/40 border-l-4 border-l-green-500">
+                            <h3 class="font-bold font-orbitron text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-hand-holding-heart text-green-400"></i> Issue Book
+                            </h3>
+                            <form id="issueBookForm" class="space-y-4">
+                                <input type="text" name="studentId" required placeholder="Student ID" class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-green-500 focus:outline-none transition-colors">
+                                <select name="bookId" required class="w-full bg-black border border-white/10 p-3 rounded text-sm text-white focus:border-green-500" id="bookSelectDropdown">
+                                    <option value="">Select Book</option>
+                                </select>
+                                <input type="date" name="dueDate" required class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm text-white focus:border-green-500 focus:outline-none transition-colors">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-check-circle"></i> Issue Book
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Dashboard Logic -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Hide loader
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    // Scroll to section handler
+    document.querySelectorAll('.scroll-to-section').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('href');
+            if (target.startsWith('#')) {
+                const element = document.querySelector(target);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    });
+
+    loadDashboard();
+});
+
+// Check if user is logged in
+function checkAuth() {
+    const user = window.API.auth.getUser();
+    if (!user) {
+        window.location.href = '../auth/admin-login.html';
+        return null;
+    }
+    if (user.role !== 'admin') {
+        alert('SECURITY EXCEPTION: Unauthorized Access. Admin privileges required.');
+        window.API.auth.logout();
+        window.location.href = '../index.html';
+        return null;
+    }
+    return user;
+}
+
+// Logout function
+function logout() {
+    window.API.auth.logout();
+    window.location.href = '../index.html';
+}
+
+// Load dashboard data
+async function loadDashboard() {
+    const user = checkAuth();
+    if (!user) return;
+
+    document.getElementById('userName').textContent = user.name;
+
+    try {
+        // Load placement stats
+        const statsResult = await window.API.placement.getStats();
+        if (statsResult.success) {
+            const stats = statsResult.stats;
+            document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+            document.getElementById('placedStudents').textContent = stats.placedStudents || 0;
+            document.getElementById('placementRate').textContent = Math.round(stats.placementRate || 0) + '%';
+            document.getElementById('avgSalary').textContent = stats.avgSalary ? (stats.avgSalary / 100000).toFixed(1) : '0';
+
+            // Load top companies
+            loadTopCompanies(stats.topCompanies || []);
+
+            // Initialize Analytics Chart
+            initEnrollmentChart();
+        }
+
+        // Load all placements
+        const placementsResult = await window.API.placement.getAllPlacements();
+        if (placementsResult.success) {
+            loadRecentPlacements(placementsResult.placements || []);
+        }
+
+        // Load all faculty
+        const facultyResult = await window.API.faculty.getAllFaculty();
+        if (facultyResult.success) {
+            loadFacultyList(facultyResult.faculty || []);
+        }
+
+        // Load library data
+        loadLibraryData();
+
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+function initEnrollmentChart() {
+    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Student Inquiries',
+                data: [65, 59, 80, 81, 56, 95],
+                borderColor: '#3b82f6',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)'
+            }, {
+                label: 'Confirmed Admissions',
+                data: [28, 48, 40, 19, 86, 27],
+                borderColor: '#d4af37',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(212, 175, 55, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#9ca3af', font: { size: 10 } } }
+            },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+            }
+        }
+    });
+}
+
+// Event Submission Logic
+document.getElementById('eventForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        // We'll use the API client to create the event
+        const result = await window.API.notification.query ? null : await window.API.notification.broadcastNotification(data);
+        // Fallback to a custom event creation if needed, but since we already have broadcast, let's use that
+        alert('Event Broadcast successfully!');
+        e.target.reset();
+    } catch (error) {
+        alert('Failed to broadcast event: ' + error.message);
+    }
+});
+
+// Load top companies
+function loadTopCompanies(companies) {
+    const list = document.getElementById('topCompaniesList');
+    list.innerHTML = '';
+
+    if (companies.length === 0) {
+        list.innerHTML = '<div class="col-span-3 text-center py-6 text-gray-500">No placement records available</div>';
+        return;
+    }
+
+    companies.slice(0, 3).forEach((company, idx) => {
+        const delay = idx * 0.1;
+        const card = document.createElement('div');
+        card.className = 'bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-colors flex flex-col justify-between';
+        card.innerHTML = `
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-bold text-white text-sm truncate pr-2">${company._id || company.name}</h4>
+                    <span class="badge bg-gold/20 text-gold border border-gold/30 px-2 py-0.5">${company.count || company.hires}</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-1">Avg Package</p>
+                <p class="text-lg font-bold text-green-400">₹${((company.avgSalary || company.package)/100000).toFixed(1)} LPA</p>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+// Load recent placements
+function loadRecentPlacements(placements) {
+    const list = document.getElementById('recentPlacements');
+    list.innerHTML = '';
+
+    if (placements.length === 0) {
+        list.innerHTML = '<div class="text-center py-4 text-gray-500">No placements recorded</div>';
+        return;
+    }
+
+    placements.slice(0, 5).forEach(placement => {
+        const item = document.createElement('div');
+        item.className = 'bg-white/5 border border-white/10 p-3 rounded-lg flex items-start gap-3 hover:bg-white/10 transition-colors';
+        item.innerHTML = `
+            <div class="w-8 h-8 rounded bg-green-500/10 flex items-center justify-center shrink-0 border border-green-500/20 mt-1">
+                <i class="fas fa-check text-green-500 text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-white text-sm truncate">${placement.companyName}</p>
+                <p class="text-gray-400 text-xs truncate">${placement.position}</p>
+            </div>
+            <div class="text-right shrink-0">
+                <p class="text-green-400 font-bold text-sm">₹${(placement.salary/100000).toFixed(1)}L</p>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// Load faculty list
+function loadFacultyList(faculty) {
+    const list = document.getElementById('facultyList');
+    list.innerHTML = '';
+
+    if (faculty.length === 0) {
+        list.innerHTML = '<div class="text-center py-4 text-gray-500">No faculty members found</div>';
+        return;
+    }
+
+    faculty.slice(0, 5).forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors';
+        const initial = (f.userId?.name || 'F').charAt(0);
+        item.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30 text-purple-400 font-bold text-xs">
+                ${initial}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-white text-sm truncate">${f.userId?.name || 'Faculty Member'}</p>
+                <p class="text-gray-500 text-xs truncate">${f.designation} • ${f.department}</p>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// Create course
+document.getElementById('courseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Fill in required mock data for the API request
+    data.department = 'Administration';
+    data.semester = 1;
+    data.duration = 4;
+    data.eligibility = "Passed 10+2";
+    data.totalSeats = 60;
+    data.description = "New course added by administrator.";
+
+    try {
+        const result = await window.API.course.createCourse(data);
+        if (result.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Success';
+            btn.className = 'w-full bg-green-600 text-white py-2 rounded text-sm font-bold';
+            setTimeout(() => {
+                e.target.reset();
+                btn.innerHTML = originalText;
+                btn.className = 'w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-sm font-bold transition-colors';
+            }, 2000);
+        }
+    } catch (error) {
+        alert('System Error: ' + error.message);
+        btn.innerHTML = originalText;
+    }
+});
+
+// Record placement (only if form exists)
+const placementFormEl = document.getElementById('placementForm');
+if (placementFormEl) {
+    placementFormEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        data.academicYear = new Date().getFullYear().toString();
+        data.status = 'Placed';
+
+        try {
+            const result = await window.API.placement.createPlacement(data);
+            if (result.success) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                btn.className = 'w-full bg-green-600 text-white py-2 rounded text-sm font-bold';
+                setTimeout(() => {
+                    e.target.reset();
+                    btn.innerHTML = originalText;
+                    btn.className = 'w-full bg-green-600 hover:bg-green-500 text-white py-2 rounded text-sm font-bold transition-colors';
+                    loadDashboard(); // Refresh stats
+                }, 2000);
+            }
+        } catch (error) {
+            alert('System Error: ' + error.message);
+            btn.innerHTML = originalText;
+        }
+    });
+}
+
+// ============= LIBRARY MANAGEMENT FUNCTIONS =============
+
+// Load library data
+async function loadLibraryData() {
+    try {
+        const statsResult = await window.API.library.getStats();
+        if (statsResult.success) {
+            document.getElementById('totalBooks').textContent = statsResult.stats.totalBooks;
+            document.getElementById('availableBooks').textContent = statsResult.stats.totalAvailable;
+            document.getElementById('issuedBooks').textContent = statsResult.stats.issuedCount;
+            document.getElementById('overdueBooks').textContent = statsResult.stats.overdueCount;
+        }
+
+        const booksResult = await window.API.library.getInventory();
+        if (booksResult.success) {
+            displayInventory(booksResult.books);
+            populateBookSelect(booksResult.books);
+        }
+    } catch (error) {
+        console.error('Error loading library data:', error);
+    }
+}
+
+// Display inventory table
+function displayInventory(books) {
+    const table = document.getElementById('inventoryTable');
+    table.innerHTML = '';
+
+    if (books.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No books in inventory</td></tr>';
+        return;
+    }
+
+    books.forEach(book => {
+        const row = document.createElement('tr');
+        const availabilityClass = book.available === 0 ? 'text-red-400' : book.available < 3 ? 'text-yellow-400' : 'text-green-400';
+        row.innerHTML = `
+            <td class="px-4 py-4 font-medium text-white">${book.title}</td>
+            <td class="px-4 py-4 text-gray-400">${book.author}</td>
+            <td class="px-4 py-4 text-center text-white">${book.quantity}</td>
+            <td class="px-4 py-4 text-center ${availabilityClass} font-bold">${book.available}</td>
+            <td class="px-4 py-4 text-center">
+                <button onclick="viewBookDetails('${book._id}')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 rounded transition-colors text-gray-300 hover:text-white">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </td>
+        `;
+        table.appendChild(row);
+    });
+}
+
+// Populate book select dropdown
+function populateBookSelect(books) {
+    const select = document.getElementById('bookSelectDropdown');
+    const current = select.value;
+    select.innerHTML = '<option value="">Select Book</option>';
+
+    books.filter(book => book.available > 0).forEach(book => {
+        const option = document.createElement('option');
+        option.value = book._id;
+        option.textContent = `${book.title} - ${book.author} (Available: ${book.available})`;
+        select.appendChild(option);
+    });
+
+    if (current) select.value = current;
+}
+
+// Add book form submission
+document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    data.available = data.quantity; // Initially all books are available
+
+    try {
+        const result = await window.API.library.addBook(data);
+        if (result.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Added Successfully';
+            btn.className = 'w-full bg-green-600 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2';
+            setTimeout(() => {
+                e.target.reset();
+                btn.innerHTML = originalText;
+                btn.className = 'w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2';
+                loadLibraryData();
+            }, 2000);
+        }
+    } catch (error) {
+        alert('Error adding book: ' + error.message);
+        btn.innerHTML = originalText;
+    }
+});
+
+// Issue book form submission
+document.getElementById('issueBookForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const result = await window.API.library.issueBook(data);
+        if (result.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Book Issued';
+            btn.className = 'w-full bg-green-600 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2';
+            setTimeout(() => {
+                e.target.reset();
+                btn.innerHTML = originalText;
+                btn.className = 'w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded font-bold transition-colors flex items-center justify-center gap-2';
+                loadLibraryData();
+            }, 2000);
+        }
+    } catch (error) {
+        alert('Error issuing book: ' + error.message);
+        btn.innerHTML = originalText;
+    }
+});
+
+// Search books
+document.getElementById('bookSearchInput').addEventListener('input', async (e) => {
+    const query = e.target.value;
+    const filter = document.getElementById('inventoryFilterSelect').value;
+
+    try {
+        const result = await window.API.library.getInventory({ status: filter });
+        if (result.success) {
+            const filtered = query ? result.books.filter(b => 
+                b.title.toLowerCase().includes(query.toLowerCase()) || 
+                b.author.toLowerCase().includes(query.toLowerCase())
+            ) : result.books;
+            displayInventory(filtered);
+        }
+    } catch (error) {
+        console.error('Error searching books:', error);
+    }
+});
+
+// Filter inventory
+document.getElementById('inventoryFilterSelect').addEventListener('change', async (e) => {
+    const filter = e.target.value;
+    try {
+        const result = await window.API.library.getInventory({ status: filter });
+        if (result.success) {
+            displayInventory(result.books);
+        }
+    } catch (error) {
+        console.error('Error filtering books:', error);
+    }
+});
+
+// View book details (placeholder)
+function viewBookDetails(bookId) {
+    alert('Book details for ID: ' + bookId);
+    // Can be expanded to show a modal with book details
+}
+
+</script>
+
+</body>
+</html>

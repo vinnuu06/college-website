@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admissions | BELLARI BUSINESS COLLEGE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="public/css/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="public/js/three-bg.js"></script>
+</head>
+
+<body>
+
+<!-- Loader -->
+<div id="loader">
+    <div class="flex flex-col items-center">
+        <div class="loader-spinner"></div>
+        <h2 class="loader-text">INITIALIZING ADMISSIONS</h2>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- NAVBAR -->
+<nav class="nav-glass">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-20">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="relative w-10 h-10 flex items-center justify-center glow-gold">
+                        <i class="fas fa-graduation-cap text-gold text-2xl absolute z-10" style="color: var(--gold);"></i>
+                    </div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider text-white">
+                        BELLARI<span style="color: var(--red-bright);">BUSINESS</span>COLLEGE
+                    </span>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="hidden md:flex space-x-8 items-center text-sm font-semibold tracking-wide">
+                <a href="index.html" class="nav-link text-gray-300 hover:text-white">Home</a>
+                <a href="about.html" class="nav-link text-gray-300 hover:text-white">About</a>
+                <a href="courses.html" class="nav-link text-gray-300 hover:text-white">Academics</a>
+                <a href="faculty.html" class="nav-link text-gray-300 hover:text-white">Faculty</a>
+                <a href="admissions.html" class="nav-link" style="color: var(--gold);">Admissions</a>
+                <a href="placements.html" class="nav-link text-gray-300 hover:text-white">Placements</a>
+                <a href="contact.html" class="nav-link text-gray-300 hover:text-white">Contact</a>
+
+                <!-- Login Dropdown -->
+                <div class="relative group">
+                    <button class="btn-primary" style="padding: 10px 20px;">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Portals
+                    </button>
+                    
+                    <div class="absolute right-0 mt-2 w-56 glass-card p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100" style="z-index: 100; border-radius: 12px; padding: 10px;">
+                        <a href="auth/student-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                            <i class="fas fa-user-graduate w-6 text-center" style="color: var(--gold);"></i> Student Portal
+                        </a>
+                        <a href="auth/faculty-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white mt-1">
+                            <i class="fas fa-chalkboard-teacher w-6 text-center" style="color: var(--gold);"></i> Faculty Portal
+                        </a>
+                        <div class="h-px bg-white/10 my-2"></div>
+                        <a href="auth/admin-login.html" class="block px-4 py-3 hover:bg-white/5 rounded-lg transition-colors flex items-center text-gray-200 hover:text-white">
+                            <i class="fas fa-shield-alt w-6 text-center" style="color: var(--red-bright);"></i> Admin Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HEADER SECTION -->
+<header class="pt-24 md:pt-32 pb-12 md:pb-16 relative z-10 text-center">
+    <div class="max-w-4xl mx-auto px-6">
+        <h1 class="text-3xl md:text-4xl lg:text-6xl font-black font-orbitron mb-4 fade-in">
+            JOIN <span class="gradient-text-gold">THE LEGACY</span>
+        </h1>
+        <div class="section-divider fade-in fade-in-delay-1"></div>
+        <p class="text-base md:text-lg lg:text-xl text-gray-300 font-light fade-in fade-in-delay-2 mt-6">
+            Admissions open for the Academic Year 2026-2027. Apply now to secure your future.
+        </p>
+    </div>
+</header>
+
+<!-- ADMISSION FORM -->
+<section class="py-12 relative z-10">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="glass-card fade-in">
+            <h2 class="text-2xl font-bold font-orbitron text-white mb-6 border-b border-white/10 pb-4">
+                Application Form
+            </h2>
+            
+            <div id="form-alert" class="hidden mb-6 p-4 rounded-lg text-sm"></div>
+
+            <form id="admission-form" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">Full Name *</label>
+                        <input type="text" id="fullName" required class="input-field" placeholder="Enter your full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">Email Address *</label>
+                        <input type="email" id="email" required class="input-field" placeholder="Enter your email">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">Phone Number *</label>
+                        <input type="tel" id="phone" required class="input-field" placeholder="Enter mobile number">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">Course Applied For *</label>
+                        <select id="courseApplied" required class="input-field" style="appearance: none;">
+                            <option value="" disabled selected>Select a course</option>
+                            <!-- Dynamic courses loaded here -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">10th Marks (%) *</label>
+                        <input type="number" id="qualifying10Marks" required min="0" max="100" class="input-field" placeholder="Percentage">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 font-semibold">12th Marks (%) *</label>
+                        <input type="number" id="qualifying12Marks" required min="0" max="100" class="input-field" placeholder="Percentage">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 font-semibold">Address *</label>
+                    <textarea id="address" required rows="3" class="input-field resize-none" placeholder="Enter full address"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-white/10">
+                    <button type="submit" id="submit-btn" class="btn-primary w-full justify-center text-lg">
+                        Submit Application <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- API SCRIPT -->
+<script src="public/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Hide loader
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => loader.remove(), 600);
+        }
+    }, 1000);
+
+    // Navbar scroll effect
+    const nav = document.querySelector('.nav-glass');
+    window.addEventListener('scroll', () => {
+        if(window.scrollY > 50) {
+            nav.style.background = 'rgba(5, 5, 5, 0.95)';
+        } else {
+            nav.style.background = 'rgba(5, 5, 5, 0.7)';
+        }
+    });
+
+    // Load courses for select dropdown
+    try {
+        const data = await window.API.course.getAllCourses();
+        if(data.success && data.courses) {
+            const select = document.getElementById('courseApplied');
+            
+            // Check URL for pre-selected course
+            const urlParams = new URLSearchParams(window.location.search);
+            const preSelected = urlParams.get('course');
+            
+            data.courses.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c._id;
+                option.textContent = `${c.courseCode} - ${c.courseName}`;
+                if(preSelected === c._id) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+    } catch(err) {
+        console.error('Failed to load courses:', err);
+    }
+
+    // Handle form submission
+    document.getElementById('admission-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submit-btn');
+        const alertBox = document.getElementById('form-alert');
+        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+        btn.disabled = true;
+        
+        // Prepare data
+        // For backwards compatibility with backend API, sending 'marks' and 'percentage' based on 12th
+        const marks12 = document.getElementById('qualifying12Marks').value;
+        const data = {
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            courseApplied: document.getElementById('courseApplied').value,
+            qualifying10Marks: document.getElementById('qualifying10Marks').value,
+            qualifying12Marks: marks12,
+            marks: marks12,
+            percentage: marks12,
+            address: document.getElementById('address').value
+        };
+
+        try {
+            const result = await window.API.admission.apply(data);
+            if(result.success) {
+                alertBox.className = 'mb-6 p-4 rounded-lg text-sm bg-green-500/20 border border-green-500/50 text-green-400';
+                alertBox.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Application submitted successfully! We will contact you soon.';
+                alertBox.classList.remove('hidden');
+                document.getElementById('admission-form').reset();
+            }
+        } catch(error) {
+            alertBox.className = 'mb-6 p-4 rounded-lg text-sm bg-red-500/20 border border-red-500/50 text-red-400';
+            alertBox.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> Error: ${error.message || 'Submission failed'}`;
+            alertBox.classList.remove('hidden');
+        } finally {
+            btn.innerHTML = 'Submit Application <i class="fas fa-paper-plane ml-2"></i>';
+            btn.disabled = false;
+        }
+    });
+});
+</script>
+
+</body>
+</html>
